@@ -23,9 +23,9 @@ ASSIST_MODEL="TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 DEEPSEEK_DATA="../Data-Collection/deepseek"
 FORGET_DATA="${DEEPSEEK_DATA}/D_forget.json"
 
-# Basis extraction params
-MAX_FORGET=400
-MAX_RETAIN=400
+# Basis extraction params (use all D_forget.json samples)
+MAX_FORGET=99999
+MAX_RETAIN=99999
 MAX_LEN=512
 TOP_K=192
 SEED=42

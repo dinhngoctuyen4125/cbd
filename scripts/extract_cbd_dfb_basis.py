@@ -640,14 +640,10 @@ def main():
 
     config = {
         "base_model_name": args.base_model_name,
-        "dataset": args.dataset,
-        "forget_split": args.forget_split,
-        "retain_split": args.retain_split,
-        "wmdp_domains": args.wmdp_domains,
-        "mmlu_retain_file": args.mmlu_retain_file,
-        "mmlu_retain_subjects": args.mmlu_retain_subjects,
+        "deepseek_data_path": args.deepseek_data_path,
         "max_forget": args.max_forget,
         "max_retain": args.max_retain,
+        "max_len": args.max_len,
         "mu": args.mu,
         "mu_mode": args.mu_mode,
         "mu_scale": args.mu_scale,
@@ -655,8 +651,7 @@ def main():
         "top_k": args.top_k,
         "batch_size": args.batch_size,
         "grad_store_dtype": args.grad_store_dtype,
-        "refuse_forget": bool(args.refuse_forget),
-        "refuse_answer": args.refuse_answer,
+        "seed": args.seed,
         "lora": {
             "r": args.lora_r,
             "alpha": args.lora_alpha,
