@@ -11,8 +11,9 @@
 
 set -e  # Exit on error
 
-# Ensure Python can find the local 'uld' module
+# Ensure Python can find the local 'uld' module and disable output buffering
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+export PYTHONUNBUFFERED=1
 
 # --------------- Configuration ---------------
 # Model
