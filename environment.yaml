@@ -103,12 +103,14 @@ dependencies:
   - ncurses=6.4=h6a678d5_0
   - nettle=3.7.3=hbbd107a_1
   - networkx=3.2.1=py310h06a4308_0
+  - ninja=1.11.1
   - nsight-compute=2022.3.0.22=0
   - numpy=1.26.4=py310h5f9d8c6_0
   - numpy-base=1.26.4=py310hb5e798b_0
   - openh264=2.1.1=h4ff587b_0
   - openjpeg=2.4.0=h3ad879b_0
   - openssl=3.0.13=h7f8727e_2
+  - packaging=23.2
   - pillow=10.3.0=py310h5eee18b_0
   - pip=24.0=py310h06a4308_0
   - pysocks=1.7.1=py310h06a4308_0
@@ -163,9 +165,7 @@ dependencies:
       - mdurl==0.1.2
       - multidict==6.0.5
       - multiprocess==0.70.16
-      - ninja==1.11.1.1
       - omegaconf==2.3.0
-      - packaging==24.1
       - pandas==2.2.2
       - peft==0.11.1
       - platformdirs==4.2.2
