@@ -1,0 +1,21 @@
+dataset:
+  class_name: Deepseek
+  name: ../Data-Collection/deepseek
+  split: D_forget
+  max_length: 512
+  question_key: probing input
+  answer_key: y_neg
+
+  eval:
+    batch_size: 4
+    retain_result: null
+    generation:
+      max_length: 512
+      max_new_tokens: null
+
+conv_template:
+  question_start_token: ""
+  question_end_token: ""
+  answer_token: ""
+  strip_prompt: false
+  max_len: 512
