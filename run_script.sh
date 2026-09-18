@@ -11,6 +11,9 @@
 
 set -e  # Exit on error
 
+# Ensure Python can find the local 'uld' module
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+
 # --------------- Configuration ---------------
 # Model
 ASSIST_MODEL="TinyLlama/TinyLlama-1.1B-Chat-v1.0"
