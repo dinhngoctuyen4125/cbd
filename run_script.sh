@@ -62,7 +62,7 @@ python scripts/extract_cbd_dfb_basis.py \
     --max_len ${MAX_LEN} \
     --top_k ${TOP_K} \
     --seed ${SEED} \
-    --batch_size 16 \
+    --batch_size 8 \
     --output_dir "${BASIS_DIR}"
 
 echo ""
