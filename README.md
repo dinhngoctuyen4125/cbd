@@ -8,7 +8,7 @@ Create the Python environment from the provided environment file or install the 
 
 ```bash
 conda env create -f environment.yaml
-conda activate cbd
+conda activate cbd_agv
 ```
 
 or
