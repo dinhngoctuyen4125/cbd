@@ -1,4 +1,4 @@
-﻿name: cbd
+﻿name: cbd_agv
 channels:
   - pytorch
   - nvidia
