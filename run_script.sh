@@ -24,8 +24,8 @@ DEEPSEEK_DATA="../Data-Collection/deepseek"
 FORGET_DATA="${DEEPSEEK_DATA}/D_forget.json"
 
 # Basis extraction params (use all D_forget.json samples)
-MAX_FORGET=500
-MAX_RETAIN=500
+MAX_FORGET=99999
+MAX_RETAIN=99999
 MAX_LEN=512
 TOP_K=192
 SEED=42
@@ -45,56 +45,56 @@ BASIS_FILE="${BASIS_DIR}/cbd_dfb_basis_deepseek_forget_vs_deepseek_retain.pkl"
 # =============================================================================
 # Stage 1: Extract CBD-DFB Basis
 # =============================================================================
-# echo ""
-# echo "============================================================"
-# echo "  Stage 1: Extract CBD-DFB Basis"
-# echo "============================================================"
-# echo ""
+echo ""
+echo "============================================================"
+echo "  Stage 1: Extract CBD-DFB Basis"
+echo "============================================================"
+echo ""
 
-# python scripts/extract_cbd_dfb_basis.py \
-#     --base_model_name "${ASSIST_MODEL}" \
-#     --deepseek_data_path "${FORGET_DATA}" \
-#     --max_forget ${MAX_FORGET} \
-#     --max_retain ${MAX_RETAIN} \
-#     --max_len ${MAX_LEN} \
-#     --top_k ${TOP_K} \
-#     --seed ${SEED} \
-#     --batch_size 8 \
-#     --output_dir "${BASIS_DIR}"
+python scripts/extract_cbd_dfb_basis.py \
+    --base_model_name "${ASSIST_MODEL}" \
+    --deepseek_data_path "${FORGET_DATA}" \
+    --max_forget ${MAX_FORGET} \
+    --max_retain ${MAX_RETAIN} \
+    --max_len ${MAX_LEN} \
+    --top_k ${TOP_K} \
+    --seed ${SEED} \
+    --batch_size 8 \
+    --output_dir "${BASIS_DIR}"
 
-# echo ""
-# echo "[Stage 1] Basis saved to: ${BASIS_FILE}"
-# echo ""
+echo ""
+echo "[Stage 1] Basis saved to: ${BASIS_FILE}"
+echo ""
 
 # =============================================================================
 # Stage 2: Train A1 Model
 # =============================================================================
-# echo ""
-# echo "============================================================"
-# echo "  Stage 2: Train A1 (Unlearning)"
-# echo "============================================================"
-# echo ""
+echo ""
+echo "============================================================"
+echo "  Stage 2: Train A1 (Unlearning)"
+echo "============================================================"
+echo ""
 
-# DISABLE_INTERNAL_EVAL=1 python scripts/hf_forget_train.py \
-#     --config-name cbd_dfb_tinyllama_deepseek \
-#     enable_cbd_dfb=true \
-#     cbd_dfb_basis_path="${BASIS_FILE}" \
-#     seed=${SEED} \
-#     lora_seed=${SEED} \
-#     trainer.batch_size=16 \
-#     trainer.gradient_accumulation_steps=1 \
-#     trainer.max_epochs=3 \
-#     OUTPUTMODELDIR="${TRAIN_OUTPUT_DIR}"
+DISABLE_INTERNAL_EVAL=1 python scripts/hf_forget_train.py \
+    --config-name cbd_dfb_tinyllama_deepseek \
+    enable_cbd_dfb=true \
+    cbd_dfb_basis_path="${BASIS_FILE}" \
+    seed=${SEED} \
+    lora_seed=${SEED} \
+    trainer.batch_size=16 \
+    trainer.gradient_accumulation_steps=1 \
+    trainer.max_epochs=3 \
+    OUTPUTMODELDIR="${TRAIN_OUTPUT_DIR}"
 
-# # Find the latest checkpoint (may be nested in subdirectories)
-# CHECKPOINT=$(find "${TRAIN_OUTPUT_DIR}" -type d -name "checkpoint-*" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
-# if [ -z "${CHECKPOINT}" ]; then
-#     echo "[ERROR] No checkpoint found in ${TRAIN_OUTPUT_DIR}"
-#     exit 1
-# fi
-# echo ""
-# echo "[Stage 2] Checkpoint: ${CHECKPOINT}"
-# echo ""
+# Find the latest checkpoint (may be nested in subdirectories)
+CHECKPOINT=$(find "${TRAIN_OUTPUT_DIR}" -type d -name "checkpoint-*" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
+if [ -z "${CHECKPOINT}" ]; then
+    echo "[ERROR] No checkpoint found in ${TRAIN_OUTPUT_DIR}"
+    exit 1
+fi
+echo ""
+echo "[Stage 2] Checkpoint: ${CHECKPOINT}"
+echo ""
 
 # =============================================================================
 # Stage 3: Infer + Score (sym-KL routing)
