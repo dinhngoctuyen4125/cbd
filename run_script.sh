@@ -84,7 +84,7 @@ python scripts/hf_forget_train.py \
     cbd_dfb_basis_path="${BASIS_FILE}" \
     seed=${SEED} \
     lora_seed=${SEED} \
-    trainer.batch_size=8 \
+    trainer.batch_size=16 \
     trainer.gradient_accumulation_steps=1 \
     OUTPUTMODELDIR="${TRAIN_OUTPUT_DIR}"
 
