@@ -24,8 +24,8 @@ DEEPSEEK_DATA="../Data-Collection/deepseek"
 FORGET_DATA="${DEEPSEEK_DATA}/D_forget.json"
 
 # Basis extraction params (use all D_forget.json samples)
-MAX_FORGET=400
-MAX_RETAIN=400
+MAX_FORGET=500
+MAX_RETAIN=500
 MAX_LEN=512
 TOP_K=192
 SEED=42
@@ -33,14 +33,11 @@ SEED=42
 # Output directories
 BASIS_DIR="artifacts/basis_cbd_dfb/deepseek"
 TRAIN_OUTPUT_DIR="artifacts/outputs_trained_models/cbd_dfb_tinyllama_deepseek"
-THRESHOLD_DIR="artifacts/ce_deepseek/threshold"
-SCORE_DIR="artifacts/ce_deepseek/scoring"
 
-# Threshold/Scoring params
-THRESHOLD_SAMPLES=200  # First 200 samples for threshold
-SCORE_SAMPLES=500      # Up to 500 remaining samples for scoring
-MAX_NEW_TOKENS=20
-BATCH_SIZE=4
+# Inference params
+THRESHOLD_SAMPLES=200  # Calibration samples per test set
+SCORE_SAMPLES=500      # Cap on negative test set
+BATCH_SIZE=8
 
 # --------------- Derived paths ---------------
 BASIS_FILE="${BASIS_DIR}/cbd_dfb_basis_deepseek_forget_vs_deepseek_retain.pkl"
@@ -100,105 +97,29 @@ echo "[Stage 2] Checkpoint: ${CHECKPOINT}"
 echo ""
 
 # =============================================================================
-# Stage 3: Compute Threshold
+# Stage 3: Infer + Score (sym-KL routing)
 # =============================================================================
 echo ""
 echo "============================================================"
-echo "  Stage 3: Compute Sym-KL Threshold"
+echo "  Stage 3: Sym-KL Routing Evaluation"
 echo "============================================================"
 echo ""
 
-mkdir -p "${THRESHOLD_DIR}"
+EVAL_DIR="artifacts/eval_outputs/deepseek"
+mkdir -p "${EVAL_DIR}"
 
-# 3a: Sym-KL on first 200 samples of D_test_U_dep (forget-like group)
-echo "[Stage 3a] Scoring D_test_U_dep (first ${THRESHOLD_SAMPLES} samples)..."
-python scripts/assis_tinyllama_test_path.py \
-    --model_path "${CHECKPOINT}" \
-    --pretrained_model_name "${ASSIST_MODEL}" \
-    --dataset_name "${DEEPSEEK_DATA}" \
-    --dataset_split "D_test_U_dep" \
-    --question_key "probing input" \
-    --answer_key "y_neg" \
-    --max_samples ${THRESHOLD_SAMPLES} \
-    --raw_prompt \
-    --max_new_tokens ${MAX_NEW_TOKENS} \
+python scripts/infer_deepseek.py \
+    --original_model_path "${ASSIST_MODEL}" \
+    --finetuned_model_path "${CHECKPOINT}" \
+    --test_dep_path "${DEEPSEEK_DATA}/D_test_U_dep.json" \
+    --test_nondep_path "${DEEPSEEK_DATA}/D_test_U_nondep.json" \
+    --output_dir "${EVAL_DIR}" \
+    --calib_dep_n ${THRESHOLD_SAMPLES} \
+    --calib_nondep_n ${THRESHOLD_SAMPLES} \
+    --test_nondep_n ${SCORE_SAMPLES} \
+    --max_len ${MAX_LEN} \
     --batch_size ${BATCH_SIZE} \
-    --output_file "tinyllama_comparison_results.json" \
-    --output_dir "${THRESHOLD_DIR}"
-
-# 3b: Sym-KL on first 200 samples of D_test_U_nondep (retain-like group)
-echo "[Stage 3b] Scoring D_test_U_nondep (first ${THRESHOLD_SAMPLES} samples)..."
-python scripts/assis_tinyllama_test_path.py \
-    --model_path "${CHECKPOINT}" \
-    --pretrained_model_name "${ASSIST_MODEL}" \
-    --dataset_name "${DEEPSEEK_DATA}" \
-    --dataset_split "D_test_U_nondep" \
-    --question_key "probing input" \
-    --max_samples ${THRESHOLD_SAMPLES} \
-    --raw_prompt \
-    --max_new_tokens ${MAX_NEW_TOKENS} \
-    --batch_size ${BATCH_SIZE} \
-    --output_file "tinyllama_comparison_results.json" \
-    --output_dir "${THRESHOLD_DIR}"
-
-# 3c: Find optimal threshold
-echo "[Stage 3c] Finding optimal threshold..."
-python scripts/analyze_cross_entropy.py \
-    --data-dir "${THRESHOLD_DIR}" \
-    --forget-split "D_test_U_dep" \
-    --retain-split "D_test_U_nondep" \
-    --optimize accuracy
-
-# =============================================================================
-# Stage 4: Score Remaining Samples
-# =============================================================================
-echo ""
-echo "============================================================"
-echo "  Stage 4: Score Remaining Samples"
-echo "============================================================"
-echo ""
-
-mkdir -p "${SCORE_DIR}"
-
-# 4a: Score remaining D_test_U_dep (skip first 200)
-echo "[Stage 4a] Scoring D_test_U_dep (skip ${THRESHOLD_SAMPLES}, max ${SCORE_SAMPLES})..."
-python scripts/assis_tinyllama_test_path.py \
-    --model_path "${CHECKPOINT}" \
-    --pretrained_model_name "${ASSIST_MODEL}" \
-    --dataset_name "${DEEPSEEK_DATA}" \
-    --dataset_split "D_test_U_dep" \
-    --question_key "probing input" \
-    --answer_key "y_neg" \
-    --skip_samples ${THRESHOLD_SAMPLES} \
-    --max_samples ${SCORE_SAMPLES} \
-    --raw_prompt \
-    --max_new_tokens ${MAX_NEW_TOKENS} \
-    --batch_size ${BATCH_SIZE} \
-    --output_file "tinyllama_comparison_results.json" \
-    --output_dir "${SCORE_DIR}"
-
-# 4b: Score remaining D_test_U_nondep (skip first 200)
-echo "[Stage 4b] Scoring D_test_U_nondep (skip ${THRESHOLD_SAMPLES}, max ${SCORE_SAMPLES})..."
-python scripts/assis_tinyllama_test_path.py \
-    --model_path "${CHECKPOINT}" \
-    --pretrained_model_name "${ASSIST_MODEL}" \
-    --dataset_name "${DEEPSEEK_DATA}" \
-    --dataset_split "D_test_U_nondep" \
-    --question_key "probing input" \
-    --skip_samples ${THRESHOLD_SAMPLES} \
-    --max_samples ${SCORE_SAMPLES} \
-    --raw_prompt \
-    --max_new_tokens ${MAX_NEW_TOKENS} \
-    --batch_size ${BATCH_SIZE} \
-    --output_file "tinyllama_comparison_results.json" \
-    --output_dir "${SCORE_DIR}"
-
-# 4c: Analyze scores with same threshold tool
-echo "[Stage 4c] Analyzing scores..."
-python scripts/analyze_cross_entropy.py \
-    --data-dir "${SCORE_DIR}" \
-    --forget-split "D_test_U_dep" \
-    --retain-split "D_test_U_nondep" \
+    --seed ${SEED} \
     --optimize accuracy
 
 # =============================================================================
@@ -212,6 +133,6 @@ echo ""
 echo "Results:"
 echo "  Basis:     ${BASIS_FILE}"
 echo "  Model:     ${CHECKPOINT}"
-echo "  Threshold: ${THRESHOLD_DIR}/"
-echo "  Scores:    ${SCORE_DIR}/"
+echo "  Eval:      ${EVAL_DIR}/routing_statistics.json"
 echo ""
+
