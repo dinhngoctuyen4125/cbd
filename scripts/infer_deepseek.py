@@ -42,6 +42,12 @@ import torch.nn.functional as F
 from peft import LoraConfig, PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+# Ensure scripts/ is on sys.path for sibling imports
+import sys as _sys
+_scripts_dir = os.path.dirname(os.path.abspath(__file__))
+if _scripts_dir not in _sys.path:
+    _sys.path.insert(0, _scripts_dir)
+
 from routing_score_reducers import (
     DEFAULT_ROUTING_REDUCER_ALPHA,
     DEFAULT_ROUTING_REDUCER_BETA,

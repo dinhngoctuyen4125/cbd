@@ -99,6 +99,16 @@ BASIS_FILE="${BASIS_DIR}/cbd_dfb_basis_deepseek_forget_vs_deepseek_retain.pkl"
 # =============================================================================
 # Stage 3: Infer + Score (sym-KL routing)
 # =============================================================================
+
+# Find the latest checkpoint (works whether Stage 2 just ran or was skipped)
+CHECKPOINT=$(find "${TRAIN_OUTPUT_DIR}" -type d -name "checkpoint-*" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
+if [ -z "${CHECKPOINT}" ]; then
+    echo "[ERROR] No checkpoint found in ${TRAIN_OUTPUT_DIR}"
+    exit 1
+fi
+echo ""
+echo "  Using checkpoint: ${CHECKPOINT}"
+
 echo ""
 echo "============================================================"
 echo "  Stage 3: Sym-KL Routing Evaluation"
