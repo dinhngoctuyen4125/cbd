@@ -69,32 +69,32 @@ BASIS_FILE="${BASIS_DIR}/cbd_dfb_basis_deepseek_forget_vs_deepseek_retain.pkl"
 # =============================================================================
 # Stage 2: Train A1 Model
 # =============================================================================
-echo ""
-echo "============================================================"
-echo "  Stage 2: Train A1 (Unlearning)"
-echo "============================================================"
-echo ""
+# echo ""
+# echo "============================================================"
+# echo "  Stage 2: Train A1 (Unlearning)"
+# echo "============================================================"
+# echo ""
 
-DISABLE_INTERNAL_EVAL=1 python scripts/hf_forget_train.py \
-    --config-name cbd_dfb_tinyllama_deepseek \
-    enable_cbd_dfb=true \
-    cbd_dfb_basis_path="${BASIS_FILE}" \
-    seed=${SEED} \
-    lora_seed=${SEED} \
-    trainer.batch_size=16 \
-    trainer.gradient_accumulation_steps=1 \
-    trainer.max_epochs=3 \
-    OUTPUTMODELDIR="${TRAIN_OUTPUT_DIR}"
+# DISABLE_INTERNAL_EVAL=1 python scripts/hf_forget_train.py \
+#     --config-name cbd_dfb_tinyllama_deepseek \
+#     enable_cbd_dfb=true \
+#     cbd_dfb_basis_path="${BASIS_FILE}" \
+#     seed=${SEED} \
+#     lora_seed=${SEED} \
+#     trainer.batch_size=16 \
+#     trainer.gradient_accumulation_steps=1 \
+#     trainer.max_epochs=3 \
+#     OUTPUTMODELDIR="${TRAIN_OUTPUT_DIR}"
 
-# Find the latest checkpoint (may be nested in subdirectories)
-CHECKPOINT=$(find "${TRAIN_OUTPUT_DIR}" -type d -name "checkpoint-*" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
-if [ -z "${CHECKPOINT}" ]; then
-    echo "[ERROR] No checkpoint found in ${TRAIN_OUTPUT_DIR}"
-    exit 1
-fi
-echo ""
-echo "[Stage 2] Checkpoint: ${CHECKPOINT}"
-echo ""
+# # Find the latest checkpoint (may be nested in subdirectories)
+# CHECKPOINT=$(find "${TRAIN_OUTPUT_DIR}" -type d -name "checkpoint-*" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
+# if [ -z "${CHECKPOINT}" ]; then
+#     echo "[ERROR] No checkpoint found in ${TRAIN_OUTPUT_DIR}"
+#     exit 1
+# fi
+# echo ""
+# echo "[Stage 2] Checkpoint: ${CHECKPOINT}"
+# echo ""
 
 # =============================================================================
 # Stage 3: Infer + Score (sym-KL routing)
