@@ -86,6 +86,7 @@ python scripts/hf_forget_train.py \
     lora_seed=${SEED} \
     trainer.batch_size=16 \
     trainer.gradient_accumulation_steps=1 \
+    trainer.max_epochs=3 \
     OUTPUTMODELDIR="${TRAIN_OUTPUT_DIR}"
 
 # Find the latest checkpoint (may be nested in subdirectories)
