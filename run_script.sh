@@ -122,8 +122,10 @@ mkdir -p "${EVAL_DIR}"
 python scripts/infer_deepseek.py \
     --original_model_path "${ASSIST_MODEL}" \
     --finetuned_model_path "${CHECKPOINT}" \
-    --test_dep_path "${DEEPSEEK_DATA}/D_test_U_dep.json" \
-    --test_nondep_path "${DEEPSEEK_DATA}/D_test_U_nondep.json" \
+    --test_dep_path "${FORGET_DATA}" \
+    --test_nondep_path "${FORGET_DATA}" \
+    --dep_answer_field "y_neg" \
+    --nondep_answer_field "y_pos" \
     --output_dir "${EVAL_DIR}" \
     --calib_dep_n ${THRESHOLD_SAMPLES} \
     --calib_nondep_n ${THRESHOLD_SAMPLES} \

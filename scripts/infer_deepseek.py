@@ -406,17 +406,11 @@ def extract_prompts(
     field: str,
     fallback: str = "probing input",
     strip: bool = True,
+    answer_field: str = None,
 ) -> List[str]:
     """Pull the prompt text out of each record.
 
-    `strip` must reproduce whatever the training-time ConvTemplate did, because the routing
-    score reads the model's distribution at the LAST prompt token -- if the two disagree, the
-    scored position is not the position training pushed on.
-
-      * `probing input`     -> ConvTemplate.prepare_gen_prompt() calls question.strip(), and
-                               9665/9667 records end in a newline, so we must strip too.
-      * `probing input new` -> never used in training; its trailing indentation is part of the
-                               anchor (1535/9667 records), so it is kept verbatim.
+    If `answer_field` is set, append record[answer_field] to the prompt.
     """
     out: List[str] = []
     for it in records:
@@ -424,7 +418,12 @@ def extract_prompts(
         if not isinstance(v, str) or not v.strip():
             v = it.get(fallback)
         if isinstance(v, str) and v.strip():
-            out.append(v.strip() if strip else v)
+            prompt = v.strip() if strip else v
+            if answer_field:
+                ans = it.get(answer_field, "")
+                if isinstance(ans, str) and ans.strip():
+                    prompt = prompt + "\n" + ans.strip()
+            out.append(prompt)
     return out
 
 
@@ -477,6 +476,10 @@ def main() -> None:
                         help="Records of D_test_U_nondep used to pick the threshold")
     parser.add_argument("--test_nondep_n", type=int, default=500,
                         help="Cap the negative TEST set (-1 = all)")
+    parser.add_argument("--dep_answer_field", type=str, default=None,
+                        help="If set, append this field to dep prompts (e.g. y_neg)")
+    parser.add_argument("--nondep_answer_field", type=str, default=None,
+                        help="If set, append this field to nondep prompts (e.g. y_pos)")
 
     # Where the scored position sits. `probing input new` is the DeepSeek analogue of the
     # author's "Answer:" -- it is cut exactly at the API qualifier (np. / torch. / scipy.integrate.),
@@ -527,8 +530,8 @@ def main() -> None:
     strip_prompt = (args.prompt_field == "probing input")
     print(f"  field={args.prompt_field!r} strip={strip_prompt} (matching ConvTemplate)")
 
-    dep_prompts_all = extract_prompts(dep_records, args.prompt_field, strip=strip_prompt)
-    nondep_prompts_all = extract_prompts(nondep_records, args.prompt_field, strip=strip_prompt)
+    dep_prompts_all = extract_prompts(dep_records, args.prompt_field, strip=strip_prompt, answer_field=args.dep_answer_field)
+    nondep_prompts_all = extract_prompts(nondep_records, args.prompt_field, strip=strip_prompt, answer_field=args.nondep_answer_field)
     print(f"  dep={len(dep_prompts_all)} nondep={len(nondep_prompts_all)}")
 
     calib_dep, test_dep_prompts = split_calib_test(dep_prompts_all, args.calib_dep_n, args.seed)
