@@ -54,6 +54,7 @@ echo ""
 python scripts/extract_cbd_dfb_basis.py \
     --base_model_name "${ASSIST_MODEL}" \
     --data_path "${FORGET_DATA}" \
+    --train_ratio 1.0 \
     --max_forget ${MAX_FORGET} \
     --max_retain ${MAX_RETAIN} \
     --max_len ${MAX_LEN} \
