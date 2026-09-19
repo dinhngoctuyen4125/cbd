@@ -78,7 +78,7 @@ echo "  Stage 2: Train A1 (Unlearning)"
 echo "============================================================"
 echo ""
 
-python scripts/hf_forget_train.py \
+DISABLE_INTERNAL_EVAL=1 python scripts/hf_forget_train.py \
     --config-name cbd_dfb_tinyllama_deepseek \
     enable_cbd_dfb=true \
     cbd_dfb_basis_path="${BASIS_FILE}" \
