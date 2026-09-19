@@ -634,7 +634,6 @@ def main() -> None:
             "calib_nondep_n": len(calib_nondep),
             "test_dep_n": len(test_dep_prompts),
             "test_nondep_n": len(test_nondep_prompts),
-            "test_nondep_capped": bool(n_cap > 0),
             "truncate_mode": args.truncate_mode,
             "score_last_k": max(1, int(args.score_last_k)),
             "score_k_mode": args.score_k_mode,
