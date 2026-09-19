@@ -158,9 +158,9 @@ class ForgetTrainer(Trainer):
         import inspect
         signature = inspect.signature(model.forward)
         _signature_columns = list(signature.parameters.keys())
-        _signature_columns += list(set(["label", "label_ids"]))
+        _signature_columns += list(set(["label", "label_ids", "labels"]))
         inputs = {k:v for k, v in inputs.items() if k in _signature_columns}
-        labels = inputs['labels']
+        labels = inputs.get('labels', None)
 
         with torch.no_grad():
             outputs = model(**inputs)
@@ -170,9 +170,9 @@ class ForgetTrainer(Trainer):
         if prediction_loss_only:
             return (loss, None, None)
         else:
-            if len(logits) == 1:
+            if logits is not None and len(logits) == 1:
                 logits = logits[0]
-            if len(labels) == 1:
+            if labels is not None and len(labels) == 1:
                 labels = labels[0]
             return (loss, logits, labels)
     
