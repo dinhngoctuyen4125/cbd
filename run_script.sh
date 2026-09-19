@@ -48,26 +48,26 @@ BASIS_FILE="${BASIS_DIR}/cbd_dfb_basis_deepseek_forget_vs_deepseek_retain.pkl"
 # =============================================================================
 # Stage 1: Extract CBD-DFB Basis
 # =============================================================================
-echo ""
-echo "============================================================"
-echo "  Stage 1: Extract CBD-DFB Basis"
-echo "============================================================"
-echo ""
+# echo ""
+# echo "============================================================"
+# echo "  Stage 1: Extract CBD-DFB Basis"
+# echo "============================================================"
+# echo ""
 
-python scripts/extract_cbd_dfb_basis.py \
-    --base_model_name "${ASSIST_MODEL}" \
-    --deepseek_data_path "${FORGET_DATA}" \
-    --max_forget ${MAX_FORGET} \
-    --max_retain ${MAX_RETAIN} \
-    --max_len ${MAX_LEN} \
-    --top_k ${TOP_K} \
-    --seed ${SEED} \
-    --batch_size 8 \
-    --output_dir "${BASIS_DIR}"
+# python scripts/extract_cbd_dfb_basis.py \
+#     --base_model_name "${ASSIST_MODEL}" \
+#     --deepseek_data_path "${FORGET_DATA}" \
+#     --max_forget ${MAX_FORGET} \
+#     --max_retain ${MAX_RETAIN} \
+#     --max_len ${MAX_LEN} \
+#     --top_k ${TOP_K} \
+#     --seed ${SEED} \
+#     --batch_size 8 \
+#     --output_dir "${BASIS_DIR}"
 
-echo ""
-echo "[Stage 1] Basis saved to: ${BASIS_FILE}"
-echo ""
+# echo ""
+# echo "[Stage 1] Basis saved to: ${BASIS_FILE}"
+# echo ""
 
 # =============================================================================
 # Stage 2: Train A1 Model
