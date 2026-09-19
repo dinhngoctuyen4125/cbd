@@ -221,3 +221,5 @@ references/**/__pycache__/
 references/**/*.pyc
 
 logs/
+
+scripts_ref
