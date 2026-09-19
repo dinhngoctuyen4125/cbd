@@ -53,12 +53,13 @@ echo ""
 
 python scripts/extract_cbd_dfb_basis.py \
     --base_model_name "${ASSIST_MODEL}" \
-    --deepseek_data_path "${FORGET_DATA}" \
+    --data_path "${FORGET_DATA}" \
     --max_forget ${MAX_FORGET} \
     --max_retain ${MAX_RETAIN} \
     --max_len ${MAX_LEN} \
     --top_k ${TOP_K} \
     --seed ${SEED} \
+    --batch_size 8 \
     --output_dir "${BASIS_DIR}"
 
 echo ""
