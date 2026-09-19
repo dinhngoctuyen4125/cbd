@@ -146,9 +146,9 @@ class ForgetTrainer(Trainer):
         #! Notice that these are evaluated on mini-batch instead of total effective batch 
         if self._should_log_trainloss():
             logitems = {
-                'trainloss/loss': loss.item(),
-                'trainloss/forgetloss': forgetloss.item(),
-                'trainloss/retainloss': retainloss.item()
+                'trainloss/loss': loss.mean().item(),
+                'trainloss/forgetloss': forgetloss.mean().item(),
+                'trainloss/retainloss': retainloss.mean().item()
             }
             self.log(logitems)
 
