@@ -474,6 +474,8 @@ def main() -> None:
                         help="Records of D_test_U_dep used to pick the threshold (max 581)")
     parser.add_argument("--calib_nondep_n", type=int, default=200,
                         help="Records of D_test_U_nondep used to pick the threshold")
+    parser.add_argument("--test_dep_n", type=int, default=500,
+                        help="Cap the positive TEST set (-1 = all)")
     parser.add_argument("--test_nondep_n", type=int, default=500,
                         help="Cap the negative TEST set (-1 = all)")
     parser.add_argument("--dep_answer_field", type=str, default=None,
@@ -537,16 +539,22 @@ def main() -> None:
     calib_dep, test_dep_prompts = split_calib_test(dep_prompts_all, args.calib_dep_n, args.seed)
     calib_nondep, test_nondep_prompts = split_calib_test(nondep_prompts_all, args.calib_nondep_n, args.seed)
 
-    # Subsample AFTER the calibration split, so the threshold is unaffected and shrinking the
-    # test set never changes which prompts were used to pick it.
-    n_cap = int(args.test_nondep_n)
-    if n_cap > 0 and len(test_nondep_prompts) > n_cap:
-        full_n = len(test_nondep_prompts)
-        order = list(range(full_n))
-        random.Random(args.seed + 1).shuffle(order)
-        test_nondep_prompts = [test_nondep_prompts[i] for i in sorted(order[:n_cap])]
-        print(f"  subsampled test nondep: {full_n} -> {len(test_nondep_prompts)} "
-              f"(FPR resolution {100.0 / len(test_nondep_prompts):.2f}%)")
+    # Subsample AFTER the calibration split, so the threshold is unaffected.
+    for label, cap_val, prompts_name in [
+        ("dep", int(args.test_dep_n), "test_dep_prompts"),
+        ("nondep", int(args.test_nondep_n), "test_nondep_prompts"),
+    ]:
+        prompts = locals()[prompts_name]
+        if cap_val > 0 and len(prompts) > cap_val:
+            full_n = len(prompts)
+            order = list(range(full_n))
+            random.Random(args.seed + 1).shuffle(order)
+            prompts = [prompts[i] for i in sorted(order[:cap_val])]
+            print(f"  subsampled test {label}: {full_n} -> {len(prompts)}")
+            if label == "dep":
+                test_dep_prompts = prompts
+            else:
+                test_nondep_prompts = prompts
 
     print(f"  calibration: dep={len(calib_dep)} nondep={len(calib_nondep)}")
     print(f"  test:        dep={len(test_dep_prompts)} nondep={len(test_nondep_prompts)}")
